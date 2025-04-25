@@ -24,7 +24,7 @@ This is project is online Valued Living Questionnaire (VLQ) for mental health
 📦 로컬에서 실행하기
 
 ```bash
-git clone https://hamsoon22.github.io/VLQ.git
+git clone https://hamsoon22.github.io/VLQ
 cd VLQ
 npm install
 npm run dev
