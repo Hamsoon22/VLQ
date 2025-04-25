@@ -17,7 +17,7 @@ This is project is online Valued Living Questionnaire (VLQ) for mental health
 
 💻 데모
 
-👉 GitHub Pages 링크: [https://yourusername.github.io/VLQ/](https://yourusername.github.io/VLQ/)
+👉 GitHub Pages 링크: (https://hamsoon22.github.io/VLQ/)
 
 > 위 주소는 실제 배포 후 작동하며, `vite.config.js`의 `base` 경로도 `/VLQ/`로 설정되어야 합니다.
 
