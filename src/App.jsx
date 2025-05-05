@@ -55,6 +55,18 @@ function QuestionSection({ title, responses, setResponses, onNext }) {
                   {i}
                 </label>
               ))}
+              {(idx === 0 || idx === 2) && (
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.9rem', color: '#888' }}>
+                  <input
+                    type="radio"
+                    name={`q-${idx}`}
+                    value={-1}
+                    checked={responses[idx] === -1}
+                    onChange={() => handleChange(idx, -1)}
+                  />
+                  해당사항 없음
+                </label>
+              )}
             </div>
           </li>
         ))}
@@ -72,12 +84,14 @@ function QuestionSection({ title, responses, setResponses, onNext }) {
 }
 
 function calculateResults(importance, commitment) {
-  const feedback1 = questions.filter((_, i) => importance[i] >= 9);
+  const validImportance = importance.map(v => v < 0 ? 0 : v);
+  const validCommitment = commitment.map(v => v < 0 ? 0 : v);
+
+  const feedback1 = questions.filter((_, i) => validImportance[i] >= 9);
   const feedback2 = questions.filter(
-    (_, i) => importance[i] >= 9 && commitment[i] <= 6
+    (_, i) => validImportance[i] >= 9 && validCommitment[i] <= 6
   );
-  const score =
-    importance.reduce((sum, val, i) => sum + val * commitment[i], 0) / 12;
+  const score = validImportance.reduce((sum, val, i) => sum + val * validCommitment[i], 0) / 12;
   return { feedback1, feedback2, score };
 }
 
@@ -90,30 +104,55 @@ function ResultPage({ results, onReset }) {
     <Container>
       <div style={{ textAlign: 'center' }}>
         <div style={{ marginBottom: '2rem' }}>
-          <h3 style={{ fontWeight: 600, marginBottom: '0.5rem' }}>[피드백 1] 내가 많은 가치를 두고 있는 분야</h3>
-          <ul style={{ listStyle: 'none', padding: 0 }}>
-            {results.feedback1.map((item, idx) => <li key={idx}>{item}</li>)}
-          </ul>
+          <h3 style={{ fontWeight: 600, marginBottom: '0.5rem' }}>내가 많은 가치를 두고 있는 분야</h3>
+          {results.feedback1.length > 0 ? (
+            <ul style={{ listStyle: 'none', padding: 0 }}>
+              {results.feedback1.map((item, idx) => (
+                <li key={idx}>{`${idx + 1}. ${item}`}</li>
+              ))}
+            </ul>
+          ) : (
+            <p>해당 없음</p>
+          )}
         </div>
+  
         <div style={{ marginBottom: '2rem' }}>
-          <h3 style={{ fontWeight: 600, marginBottom: '0.5rem' }}>[피드백 2] 가치는 높지만 실천이 낮은 분야</h3>
-          <ul style={{ listStyle: 'none', padding: 0 }}>
-            {results.feedback2.map((item, idx) => <li key={idx}>{item}</li>)}
-          </ul>
+          <h3 style={{ fontWeight: 600, marginBottom: '0.5rem' }}>가치는 높지만 실천이 낮은 분야</h3>
+          {results.feedback2.length > 0 ? (
+            <ul style={{ listStyle: 'none', padding: 0 }}>
+              {results.feedback2.map((item, idx) => (
+                <li key={idx}>{`${idx + 1}. ${item}`}</li>
+              ))}
+            </ul>
+          ) : (
+            <p>해당 없음</p>
+          )}
         </div>
+  
         <div style={{ marginBottom: '2rem' }}>
-          <h3 style={{ fontWeight: 600, marginBottom: '0.5rem' }}>[피드백 3] 나의 전반적인 가치로운 삶 점수</h3>
-          <p style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>{results.score.toFixed(2)} / 100</p>
+          <h3 style={{ fontWeight: 600, marginBottom: '0.5rem' }}>나의 전반적인 가치로운 삶 점수</h3>
+          <p style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>
+            {isNaN(results.score) ? "점수 없음" : `${results.score.toFixed(2)} / 100`}
+          </p>
         </div>
+  
         <button
           onClick={onReset}
-          style={{ backgroundColor: '#666', color: 'white', padding: '0.6rem 1.6rem', borderRadius: '8px', fontSize: '1rem' }}
+          style={{
+            backgroundColor: '#666',
+            color: 'white',
+            padding: '0.6rem 1.6rem',
+            borderRadius: '8px',
+            fontSize: '1rem'
+          }}
         >
           다시하기
         </button>
       </div>
     </Container>
   );
+  
+  
 }
 
 function App() {
@@ -124,7 +163,10 @@ function App() {
 
   const handleNext = () => setStep(2);
   const handleSubmit = () => {
-    const res = calculateResults(importance.map(v => v ?? 0), commitment.map(v => v ?? 0));
+    const res = calculateResults(
+      importance.map(v => v < 0 ? 0 : v),
+      commitment.map(v => v < 0 ? 0 : v)
+    );
     setResults(res);
     setStep(3);
   };
