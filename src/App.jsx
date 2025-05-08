@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
+import ResultPage from "./ResultPage";
 
 const questions = [
   "가족 (부부관계나 자녀양육 제외)",
@@ -95,66 +96,6 @@ function calculateResults(importance, commitment) {
   return { feedback1, feedback2, score };
 }
 
-function ResultPage({ results, onReset }) {
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }, []);
-
-  return (
-    <Container>
-      <div style={{ textAlign: 'center' }}>
-        <div style={{ marginBottom: '2rem' }}>
-          <h3 style={{ fontWeight: 600, marginBottom: '0.5rem' }}>내가 많은 가치를 두고 있는 분야</h3>
-          {results.feedback1.length > 0 ? (
-            <ul style={{ listStyle: 'none', padding: 0 }}>
-              {results.feedback1.map((item, idx) => (
-                <li key={idx}>{`${idx + 1}. ${item}`}</li>
-              ))}
-            </ul>
-          ) : (
-            <p>해당 없음</p>
-          )}
-        </div>
-  
-        <div style={{ marginBottom: '2rem' }}>
-          <h3 style={{ fontWeight: 600, marginBottom: '0.5rem' }}>가치는 높지만 실천이 낮은 분야</h3>
-          {results.feedback2.length > 0 ? (
-            <ul style={{ listStyle: 'none', padding: 0 }}>
-              {results.feedback2.map((item, idx) => (
-                <li key={idx}>{`${idx + 1}. ${item}`}</li>
-              ))}
-            </ul>
-          ) : (
-            <p>해당 없음</p>
-          )}
-        </div>
-  
-        <div style={{ marginBottom: '2rem' }}>
-          <h3 style={{ fontWeight: 600, marginBottom: '0.5rem' }}>나의 전반적인 가치로운 삶 점수</h3>
-          <p style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>
-            {isNaN(results.score) ? "점수 없음" : `${results.score.toFixed(2)} / 100`}
-          </p>
-        </div>
-  
-        <button
-          onClick={onReset}
-          style={{
-            backgroundColor: '#666',
-            color: 'white',
-            padding: '0.6rem 1.6rem',
-            borderRadius: '8px',
-            fontSize: '1rem'
-          }}
-        >
-          다시하기
-        </button>
-      </div>
-    </Container>
-  );
-  
-  
-}
-
 function App() {
   const [step, setStep] = useState(1);
   const [importance, setImportance] = useState(Array(12).fill(undefined));
@@ -201,7 +142,14 @@ function App() {
           onNext={handleSubmit}
         />
       )}
-      {step === 3 && results && <ResultPage results={results} onReset={handleReset} />}
+      {step === 3 && results && (
+        <ResultPage
+          results={results}
+          importance={importance}
+          commitment={commitment}
+          onReset={handleReset}
+        />
+      )}
     </div>
   );
 }
