@@ -18,6 +18,20 @@ const questions = [
   "환경문제",
   "예술, 창조성 등"
 ];
+const shortLabels = [
+  "가족",
+  "부부관계",
+  "양육",
+  "친구",
+  "일",
+  "교육",
+  "휴식",
+  "영성",
+  "시민참여",
+  "신체돌봄",
+  "환경",
+  "예술"
+];
 
 function Container({ children }) {
   return (
@@ -35,10 +49,10 @@ function ResultPage({ results, importance, commitment, onReset }) {
   }, []);
 
   const chartData = questions.map((label, index) => ({
-    name: label,
-    importance: importance[index] ?? 0,
-    commitment: commitment[index] ?? 0,
-  }));
+  name: shortLabels[index], // 단축 라벨 사용
+  importance: importance[index] ?? 0,
+  commitment: commitment[index] ?? 0,
+}));
 
   return (
     <Container>
@@ -73,14 +87,27 @@ function ResultPage({ results, importance, commitment, onReset }) {
         </div>
 
         {/* 차트 */}
-        <ResponsiveContainer width="100%" height={400}>
+        <ResponsiveContainer width="100%" height={500}>
           <ComposedChart
             data={chartData}
-            margin={{ top: 20, right: 50, left: 50, bottom: 100 }}
+            margin={{ top: 20, right: 30, left: 20, bottom: 120 }}
           >
-            <CartesianGrid stroke="#f5f5f5" />
-            <XAxis dataKey="name" angle={-45} textAnchor="end" interval={0} height={100} />
-            <YAxis yAxisId="left" domain={[0, 10]}>
+           <CartesianGrid stroke="#f5f5f5" />
+          <XAxis
+            dataKey="name"
+            angle={-30}
+            textAnchor="end"
+            interval={0}
+            height={120}
+            tick={{ fontSize: 11 }}
+            />
+          <YAxis
+              yAxisId="left"
+              domain={[-1, 10]}
+              tickFormatter={(value) =>
+                value === -1 ? "해당없음" : value === 0 ? "0" : value}
+                ticks={[-1, 0, 2, 4, 6, 8, 10]}
+            >
               <Label
                 value="가치로운 정도"
                 angle={-90}
@@ -88,7 +115,14 @@ function ResultPage({ results, importance, commitment, onReset }) {
                 style={{ textAnchor: "middle", fontSize: 14 }}
               />
             </YAxis>
-            <YAxis yAxisId="right" orientation="right" domain={[0, 10]}>
+            <YAxis
+              yAxisId="right"
+              orientation="right"
+              domain={[-1, 10]}
+              tickFormatter={(value) =>
+                value === -1 ? "해당없음" : value === 0 ? "0" : value}
+                ticks={[-1, 0, 2, 4, 6, 8, 10]}
+            >
               <Label
                 value="실천도"
                 angle={90}
@@ -96,13 +130,17 @@ function ResultPage({ results, importance, commitment, onReset }) {
                 style={{ textAnchor: "middle", fontSize: 14 }}
               />
             </YAxis>
-            <Tooltip />
+            <Tooltip
+              formatter={(value, name) => [
+                value === -1 ? "해당없음" : value,
+                name === "importance" ? "가치" : "실천"
+              ]}
+            />
             <Legend />
             <Line yAxisId="left" type="monotone" dataKey="importance" stroke="#8884d8" name="가치" />
             <Line yAxisId="right" type="monotone" dataKey="commitment" stroke="#82ca9d" name="실천" />
-          </ComposedChart>
-        </ResponsiveContainer>
-
+            </ComposedChart>
+          </ResponsiveContainer>
         <button onClick={onReset} style={{
           marginTop: '2rem',
           backgroundColor: '#666',
