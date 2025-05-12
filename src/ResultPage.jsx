@@ -36,10 +36,15 @@ const shortLabels = [
 function Container({ children }) {
   return (
     <div style={{
-      maxWidth: '800px', margin: '2rem auto', padding: '2rem',
-      backgroundColor: '#fff', borderRadius: '12px',
+      maxWidth: '800px',
+      margin: '1rem auto',
+      padding: '0.2rem', // ← 여기서 줄이기
+      backgroundColor: '#fff',
+      borderRadius: '12px',
       boxShadow: '0 0 20px rgba(0,0,0,0.05)'
-    }}>{children}</div>
+    }}>
+      {children}
+    </div>
   );
 }
 
@@ -147,6 +152,7 @@ function ResultPage({ results, importance, commitment, onReset }) {
           </ResponsiveContainer>
         <button onClick={onReset} style={{
           marginTop: '2rem',
+          marginBottom: '2rem',
           backgroundColor: '#666',
           color: 'white',
           padding: '0.6rem 1.6rem',
