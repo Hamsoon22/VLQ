@@ -90,16 +90,16 @@ function ResultPage({ results, importance, commitment, onReset }) {
         <ResponsiveContainer width="100%" height={500}>
           <ComposedChart
             data={chartData}
-            margin={{ top: 20, right: 30, left: 20, bottom: 120 }}
+            margin={{ top: 20, right: 0, left: 0, bottom: 120 }}
           >
-           <CartesianGrid stroke="#f5f5f5" />
-          <XAxis
-            dataKey="name"
-            angle={-30}
-            textAnchor="end"
-            interval={0}
-            height={120}
-            tick={{ fontSize: 11 }}
+            <CartesianGrid stroke="#f5f5f5" />
+            <XAxis
+              dataKey="name"
+              angle={-45}
+              textAnchor="end"
+              interval={0}
+              height={100}
+              tick={{ fontSize: 10 }}
             />
           <YAxis
               yAxisId="left"
@@ -109,7 +109,7 @@ function ResultPage({ results, importance, commitment, onReset }) {
                 ticks={[-1, 0, 2, 4, 6, 8, 10]}
             >
               <Label
-                value="가치로운 정도"
+                // value="가치로운 정도"
                 angle={-90}
                 position="insideLeft"
                 style={{ textAnchor: "middle", fontSize: 14 }}
@@ -124,22 +124,26 @@ function ResultPage({ results, importance, commitment, onReset }) {
                 ticks={[-1, 0, 2, 4, 6, 8, 10]}
             >
               <Label
-                value="실천도"
+                // value="실천도"
                 angle={90}
                 position="insideRight"
                 style={{ textAnchor: "middle", fontSize: 14 }}
               />
             </YAxis>
             <Tooltip
-              formatter={(value, name) => [
-                value === -1 ? "해당없음" : value,
-                name === "importance" ? "가치" : "실천"
-              ]}
+             formatter={(value, name) => {
+              const labelMap = {
+                importance: "가치",
+                commitment: "실천"
+              };
+              const displayValue = value === -1 ? "해당 없음" : value;
+              return [displayValue, labelMap[name] || name];
+            }}
             />
             <Legend />
             <Line yAxisId="left" type="monotone" dataKey="importance" stroke="#8884d8" name="가치" />
             <Line yAxisId="right" type="monotone" dataKey="commitment" stroke="#82ca9d" name="실천" />
-            </ComposedChart>
+          </ComposedChart>
           </ResponsiveContainer>
         <button onClick={onReset} style={{
           marginTop: '2rem',
