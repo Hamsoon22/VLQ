@@ -24,7 +24,7 @@ function Container({ children }) {
   );
 }
 
-function QuestionSection({ title, responses, setResponses, onNext }) {
+function QuestionSection({ title, responses, setResponses, onNext, disabledIndices = [] }) {
   const handleChange = (index, value) => {
     const updated = [...responses];
     updated[index] = parseInt(value);
@@ -40,38 +40,49 @@ function QuestionSection({ title, responses, setResponses, onNext }) {
     <Container>
       <h2 style={{ fontSize: '1.3rem', fontWeight: 600, marginBottom: '2rem', textAlign: 'center', color: '#2a2a2a' }}>{title}</h2>
       <ul style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-        {questions.map((q, idx) => (
+      {questions.map((q, idx) => {
+        const isDisabled = disabledIndices.includes(idx);
+        return (
           <li key={idx} style={{ borderBottom: '1px solid #eee', paddingBottom: '1rem' }}>
-            <div style={{ marginBottom: '0.5rem', fontWeight: 500 }}>{q}</div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '0.4rem' }}>
-              {[...Array(11)].map((_, i) => (
-                <label key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.9rem' }}>
-                  <input
-                    type="radio"
-                    name={`q-${idx}`}
-                    value={i}
-                    checked={responses[idx] === i}
-                    onChange={() => handleChange(idx, i)}
-                  />
-                  {i}
-                </label>
-              ))}
-              {(idx === 0 || idx === 2) && (
-                <label style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.9rem', color: '#888' }}>
-                  <input
-                    type="radio"
-                    name={`q-${idx}`}
-                    value={-1}
-                    checked={responses[idx] === -1}
-                    onChange={() => handleChange(idx, -1)}
-                  />
-                  해당사항 없음
-                </label>
-              )}
-            </div>
+            <div style={{ marginBottom: '0.5rem', fontWeight: 500, color: isDisabled ? '#999' : '#000' }}>{q}</div>
+            {isDisabled ? (
+              <div style={{ fontStyle: 'italic', color: '#aaa' }}>해당 없음으로 선택된 항목입니다.</div>
+            ) : (
+              <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '0.4rem' }}>
+                {[...Array(11)].map((_, i) => (
+                  <label key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.9rem' }}>
+                    <input
+                      type="radio"
+                      name={`q-${idx}`}
+                      value={i}
+                      checked={responses[idx] === i}
+                      onChange={() => handleChange(idx, i)}
+                    />
+                    {i}
+                  </label>
+                ))}
+                
+                {/* ✅ 해당 없음 옵션 추가: 가족(idx === 0), 양육(idx === 2)만 */}
+                {(idx === 0 || idx === 2) && (
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.9rem', color: '#888' }}>
+                    <input
+                      type="radio"
+                      name={`q-${idx}`}
+                      value={-1}
+                      checked={responses[idx] === -1}
+                      onChange={() => handleChange(idx, -1)}
+                      disabled={isDisabled} // ← 여기 추가!
+                    />
+                    해당 없음
+                  </label>
+                )}
+              </div>
+            )}
           </li>
-        ))}
+        );
+      })}
       </ul>
+
       <div style={{ marginTop: '3rem', textAlign: 'center' }}>
         <button
           onClick={handleNextWithScroll}
@@ -83,18 +94,34 @@ function QuestionSection({ title, responses, setResponses, onNext }) {
     </Container>
   );
 }
-
+ 
+  
 function calculateResults(importance, commitment) {
   const validImportance = importance.map(v => v < 0 ? 0 : v);
   const validCommitment = commitment.map(v => v < 0 ? 0 : v);
 
-  const feedback1 = questions.filter((_, i) => validImportance[i] >= 9);
-  const feedback2 = questions.filter(
-    (_, i) => validImportance[i] >= 9 && validCommitment[i] <= 6
-  );
+  const scored = questions.map((q, i) => ({
+    label: q,
+    importance: validImportance[i],
+    commitment: validCommitment[i],
+    index: i
+  }));
+
+  const feedback1 = scored
+    .filter(item => item.importance >= 9)
+    .sort((a, b) => b.importance - a.importance)
+    .map(item => item.label);
+
+  const feedback2 = scored
+    .filter(item => item.importance >= 9 && item.commitment <= 6)
+    .sort((a, b) => b.importance - a.importance)
+    .map(item => item.label);
+
   const score = validImportance.reduce((sum, val, i) => sum + val * validCommitment[i], 0) / 12;
+
   return { feedback1, feedback2, score };
 }
+
 
 function App() {
   const [step, setStep] = useState(1);
@@ -134,14 +161,17 @@ function App() {
           onNext={handleNext}
         />
       )}
-      {step === 2 && (
+
+       {step === 2 && (
         <QuestionSection
           title="2. 실제로 헌신하고 전념하는 정도"
           responses={commitment}
           setResponses={setCommitment}
           onNext={handleSubmit}
+          disabledIndices={importance.map((v, i) => v === -1 ? i : null).filter(i => i !== null)}
         />
       )}
+
       {step === 3 && results && (
         <ResultPage
           results={results}

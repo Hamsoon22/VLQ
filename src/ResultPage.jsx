@@ -53,11 +53,15 @@ function ResultPage({ results, importance, commitment, onReset }) {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
 
-  const chartData = questions.map((label, index) => ({
-  name: shortLabels[index], // 단축 라벨 사용
-  importance: importance[index] ?? 0,
-  commitment: commitment[index] ?? 0,
-}));
+  const chartData = questions.map((label, index) => {
+    const imp = importance[index];
+    const com = (imp === -1) ? -1 : (commitment[index] ?? 0); // <- 여기!
+    return {
+      name: shortLabels[index],
+      importance: imp ?? 0,
+      commitment: com
+    };
+  });
 
   return (
     <Container>
@@ -136,15 +140,27 @@ function ResultPage({ results, importance, commitment, onReset }) {
               />
             </YAxis>
             <Tooltip
-             formatter={(value, name) => {
-              const labelMap = {
-                importance: "가치",
-                commitment: "실천"
-              };
-              const displayValue = value === -1 ? "해당 없음" : value;
-              return [displayValue, labelMap[name] || name];
-            }}
-            />
+              formatter={(value, name, props) => {
+                const labelMap = {
+                  importance: "가치",
+                  commitment: "실천"
+                };
+
+                const currentData = props.payload && props.payload[0];
+
+                // 실천도 항목인데 해당 importance가 -1이면 → 해당 없음 처리
+                if (name === "commitment" && currentData?.importance === -1) {
+                  return ["해당 없음", labelMap[name]];
+                }
+
+                // 일반적으로 값이 -1이면 해당 없음 처리
+                if (value === -1) {
+                  return ["해당 없음", labelMap[name]];
+                }
+
+                return [value, labelMap[name]];
+              }}
+              />
             <Legend />
             <Line yAxisId="left" type="monotone" dataKey="importance" stroke="#8884d8" name="가치" />
             <Line yAxisId="right" type="monotone" dataKey="commitment" stroke="#82ca9d" name="실천" />
