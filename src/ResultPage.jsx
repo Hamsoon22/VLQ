@@ -141,26 +141,23 @@ function ResultPage({ results, importance, commitment, onReset }) {
             </YAxis>
             <Tooltip
               formatter={(value, name, props) => {
+                const dataKey = props.dataKey;
                 const labelMap = {
                   importance: "가치",
                   commitment: "실천"
                 };
 
-                const currentData = props.payload && props.payload[0];
+                // importance 값이 -1이면 실천도도 "해당 없음"으로 처리
+                const isDisabled = props.payload.importance === -1;
 
-                // 실천도 항목인데 해당 importance가 -1이면 → 해당 없음 처리
-                if (name === "commitment" && currentData?.importance === -1) {
-                  return ["해당 없음", labelMap[name]];
+                if (value === -1 || isDisabled) {
+                  return ["해당 없음", labelMap[dataKey] || name];
                 }
 
-                // 일반적으로 값이 -1이면 해당 없음 처리
-                if (value === -1) {
-                  return ["해당 없음", labelMap[name]];
-                }
-
-                return [value, labelMap[name]];
+                return [value, labelMap[dataKey] || name];
               }}
-              />
+            />
+
             <Legend />
             <Line yAxisId="left" type="monotone" dataKey="importance" stroke="#8884d8" name="가치" />
             <Line yAxisId="right" type="monotone" dataKey="commitment" stroke="#82ca9d" name="실천" />
