@@ -38,7 +38,7 @@ function Container({ children }) {
     <div style={{
       maxWidth: '800px',
       margin: '1rem auto',
-      padding: '0.2rem', // ← 여기서 줄이기
+      padding: '0.2rem',
       backgroundColor: '#fff',
       borderRadius: '12px',
       boxShadow: '0 0 20px rgba(0,0,0,0.05)'
@@ -55,10 +55,11 @@ function ResultPage({ results, importance, commitment, onReset }) {
 
   const chartData = questions.map((label, index) => {
     const imp = importance[index];
-    const com = (imp === -1) ? -1 : (commitment[index] ?? 0); // <- 여기!
+    const isException = index === 0 || index === 2; // 가족과 양육만 해당 없음 허용
+    const com = (!isException || imp !== 0) ? (commitment[index] ?? 0) : 0;
     return {
       name: shortLabels[index],
-      importance: imp ?? 0,
+      importance: isException ? (imp ?? 0) : Math.max(imp ?? 1, 1),
       commitment: com
     };
   });
@@ -95,7 +96,6 @@ function ResultPage({ results, importance, commitment, onReset }) {
           </p>
         </div>
 
-        {/* 차트 */}
         <ResponsiveContainer width="100%" height={500}>
           <ComposedChart
             data={chartData}
@@ -110,15 +110,13 @@ function ResultPage({ results, importance, commitment, onReset }) {
               height={100}
               tick={{ fontSize: 10 }}
             />
-          <YAxis
+            <YAxis
               yAxisId="left"
-              domain={[-1, 10]}
-              tickFormatter={(value) =>
-                value === -1 ? "해당없음" : value === 0 ? "0" : value}
-                ticks={[-1, 0, 2, 4, 6, 8, 10]}
+              domain={[0, 10]}
+              tickFormatter={(value) => value === 0 ? "해당없음" : value}
+              ticks={[0, 2, 4, 6, 8, 10]}
             >
               <Label
-                // value="가치로운 정도"
                 angle={-90}
                 position="insideLeft"
                 style={{ textAnchor: "middle", fontSize: 14 }}
@@ -127,13 +125,11 @@ function ResultPage({ results, importance, commitment, onReset }) {
             <YAxis
               yAxisId="right"
               orientation="right"
-              domain={[-1, 10]}
-              tickFormatter={(value) =>
-                value === -1 ? "해당없음" : value === 0 ? "0" : value}
-                ticks={[-1, 0, 2, 4, 6, 8, 10]}
+              domain={[0, 10]}
+              tickFormatter={(value) => value === 0 ? "해당없음" : value}
+              ticks={[0, 2, 4, 6, 8, 10]}
             >
               <Label
-                // value="실천도"
                 angle={90}
                 position="insideRight"
                 style={{ textAnchor: "middle", fontSize: 14 }}
@@ -146,23 +142,19 @@ function ResultPage({ results, importance, commitment, onReset }) {
                   importance: "가치",
                   commitment: "실천"
                 };
-
-                // importance 값이 -1이면 실천도도 "해당 없음"으로 처리
-                const isDisabled = props.payload.importance === -1;
-
-                if (value === -1 || isDisabled) {
+                const isException = props.payload.name === "가족" || props.payload.name === "양육";
+                const isDisabled = isException && props.payload.importance === 0;
+                if (value === 0 && isDisabled) {
                   return ["해당 없음", labelMap[dataKey] || name];
                 }
-
                 return [value, labelMap[dataKey] || name];
               }}
             />
-
             <Legend />
             <Line yAxisId="left" type="monotone" dataKey="importance" stroke="#8884d8" name="가치" />
             <Line yAxisId="right" type="monotone" dataKey="commitment" stroke="#82ca9d" name="실천" />
           </ComposedChart>
-          </ResponsiveContainer>
+        </ResponsiveContainer>
         <button onClick={onReset} style={{
           marginTop: '2rem',
           marginBottom: '2rem',
