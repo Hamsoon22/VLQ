@@ -1,0 +1,27 @@
+.language-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+  }
+  
+  .lang-btn {
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    background-color: white;
+    color: #333;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s ease;
+  }
+  
+  .lang-btn:hover {
+    background-color: #f0f0f0;
+  }
+  
+  .lang-btn.active {
+    background-color: #333;
+    color: white;
+  }
+  
