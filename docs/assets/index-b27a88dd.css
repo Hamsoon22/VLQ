@@ -1,0 +1,1 @@
+.language-buttons{display:flex;justify-content:center;gap:.5rem;margin-top:1rem}.lang-btn{padding:.5rem 1rem;border-radius:8px;border:1px solid #ccc;background-color:#fff;color:#333;font-weight:700;cursor:pointer;transition:.3s ease}.lang-btn:hover{background-color:#f0f0f0}.lang-btn.active{background-color:#333;color:#fff}
